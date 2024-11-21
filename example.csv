@@ -1,0 +1,22 @@
+title,url,time_added,cursor,tags,status
+"Learn JavaScript","https://developer.mozilla.org/en-US/docs/Web/JavaScript",1700832000,,javascript programming web,0
+"CSS Tricks: A Complete Guide","https://css-tricks.com/snippets/css/complete-guide-grid/",1700918400,,css design web,0
+"Understanding HTML5","https://www.w3schools.com/html/html5_intro.asp",1701004800,,html5 web development,0
+"React Official Documentation","https://reactjs.org/docs/getting-started.html",1701091200,,react javascript frontend,0
+"Node.js Tutorial","https://nodejs.dev/learn",1701177600,,nodejs backend javascript,0
+"Advanced Python Programming","https://realpython.com/advanced-python/",1701264000,,python programming backend,0
+"Introduction to Machine Learning","https://www.coursera.org/learn/machine-learning",1701350400,,machinelearning ai data,0
+"Data Structures and Algorithms","https://www.geeksforgeeks.org/data-structures/",1701436800,,algorithms computer science,0
+"GitHub Guides","https://guides.github.com/",1701523200,,git github versioncontrol,0
+"Docker Documentation","https://docs.docker.com/",1701609600,,docker container devops,0
+"Understanding REST APIs","https://www.restapitutorial.com/",1701696000,,api rest webservices,0
+"Vue.js Guide","https://vuejs.org/v2/guide/",1701782400,,vuejs javascript frontend,0
+"Learning TypeScript","https://www.typescriptlang.org/docs/",1701868800,,typescript javascript programming,0
+"Bootstrap 5 Documentation","https://getbootstrap.com/docs/5.0/getting-started/introduction/",1701955200,,bootstrap css frontend,0
+"Swift Programming Language","https://swift.org/documentation/",1702041600,,swift ios mobile,0
+"Kubernetes Basics","https://kubernetes.io/docs/tutorials/kubernetes-basics/",1702128000,,kubernetes devops container,0
+"GraphQL Introduction","https://graphql.org/learn/",1702214400,,graphql api webservices,0
+"Introduction to SQL","https://www.sqltutorial.org/",1702300800,,sql databases backend,0
+"Fullstack Development","https://www.fullstackopen.com/en/",1702387200,,fullstack javascript web,0
+"Effective Communication Skills","https://www.mindtools.com/CommSkll/CommunicationSkills.htm",1702473600,,communication softskills,0
+"Photography Basics","https://photographybasics.com/",1702560000,,photography art creativity,0

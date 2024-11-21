@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Browser Bookmarks Exported from getpocket.com</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+    }
+    
+    #search-container {
+      margin-bottom: 20px;
+    }
+    
+    #search-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+    
+    #cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 0; /* Remove padding to accommodate the hero image */
+      width: calc(33% - 40px);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      /* Removed justify-content: space-between; to allow content stacking */
+    }
+    
+    /* Hero Image Styles */
+    .hero-image {
+      width: 100%;
+      height: 50px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      background-repeat: repeat;          /* Tile the background image */
+      background-size: 78px 78px;         /* Increase tile size by 50% */
+      background-position: center;        /* Center the tiling */
+      background-color: #fff;             /* Optional: Set a background color */
+    }
+    
+    
+    
+    .bookmark-title {
+      text-decoration: none;
+      color: #333;
+      font-size: 18px;
+      margin: 10px 20px 5px 20px;
+      word-break: break-word;
+    }
+    
+    .bookmark-url {
+      color: #555;
+      font-size: 14px;
+      margin: 0 20px 10px 20px;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+    }
+    
+    .bookmark-date {
+      color: #777;
+      font-size: 12px;
+      margin: 0 20px 10px 20px;
+    }
+    
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 0 20px 10px 20px;
+    }
+    
+    .tag {
+      display: inline-block;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      font-size: 12px;
+      word-break: break-all;
+    }
+    
+    /* Popover Styles */
+    .popover {
+      position: absolute;
+      z-index: 1000;
+      width: 300px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 10px;
+      display: none;
+      max-width: 300px;
+      max-height: 200px;
+      overflow: hidden;
+      transition: opacity 0.3s;
+      opacity: 0;
+    }
+  
+    .popover.show {
+      opacity: 1;
+    }
+  
+    .popover img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    
+    @media (max-width: 768px) {
+      .card {
+        width: calc(50% - 40px);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .card {
+        width: 100%;
+      }
+    }
+  </style>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+
+  <h1>Browse Bookmarks Exported from getpocket.com</h1>
+
+  <div id="file-container">
+    <input type="file" id="csv-file-input" accept=".csv">
+  </div>
+  
+
+  <div id="search-container">
+    <input type="text" id="search-input" placeholder="Search bookmarks...">
+  </div>
+
+  <div id="cards-container">
+    <!-- Bookmark cards will be inserted here -->
+  </div>
+
+  <script>
+
+    const thumbnailCache = {};
+
+
+    // Function to parse CSV into an array of objects
+    function parseCSV(csv, delimiter = ',') {
+      const lines = csv.trim().split('\n');
+      const headers = lines[0].split(delimiter).map(h => h.trim());
+      const data = lines.slice(1).map(line => {
+        const values = line.split(delimiter).map(v => v.trim());
+        const entry = {};
+        headers.forEach((header, index) => {
+          entry[header] = values[index];
+        });
+        return entry;
+      });
+      return data;
+    }
+
+    // Function to convert Unix timestamp to readable date
+    function formatDate(timestamp) {
+      const date = new Date(timestamp * 1000); // Convert to milliseconds
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+
+    // Function to create a card element
+    // Function to create a card element
+    function createCard(bookmark) {
+      const card = document.createElement('div');
+      card.className = 'card';
+    
+      // Hero Image (Favicon) as a tiled background
+      const heroImage = document.createElement('div');
+      heroImage.className = 'hero-image';
+      const faviconUrl = getFavicon(bookmark.url) || 'images/placeholder.png'; // Fallback to placeholder
+      heroImage.style.backgroundImage = `url('${faviconUrl}')`;
+
+    
+      // Title as a clickable link
+      const link = document.createElement('a');
+      link.href = bookmark.url;
+      link.target = '_blank';
+      link.textContent = bookmark.title;
+      link.className = 'bookmark-title';
+    
+      // URL as a separate text element
+      const urlText = document.createElement('div');
+      urlText.textContent = bookmark.url;
+      urlText.className = 'bookmark-url';
+    
+      // Date added
+      const date = document.createElement('div');
+      date.textContent = `Added on: ${formatDate(bookmark.time_added)}`;
+      date.className = 'bookmark-date';
+    
+      // Tags
+      const tagsContainer = document.createElement('div');
+      tagsContainer.className = 'tags';
+      if (bookmark.tags) {
+        const tags = bookmark.tags.split(/[\s,]+/);
+        tags.forEach(tag => {
+          if (tag.trim() !== '') {
+            const tagSpan = document.createElement('span');
+            tagSpan.className = 'tag';
+            tagSpan.textContent = tag;
+            tagSpan.title = tag;
+            tagsContainer.appendChild(tagSpan);
+          }
+        });
+      }
+    
+      // Assemble the card
+      card.appendChild(heroImage); // Add hero image at the top
+      card.appendChild(link);
+      card.appendChild(urlText);
+      card.appendChild(date);
+      card.appendChild(tagsContainer);
+    
+      // Hover event listeners for popover (optional)
+      card.addEventListener('mouseenter', (event) => {
+        const popover = document.getElementById('popover');
+        const faviconUrl = getFavicon(bookmark.url);
+        if (faviconUrl) {
+          popover.innerHTML = `<img src="${faviconUrl}" alt="Thumbnail for ${bookmark.title}">`;
+        } else {
+          popover.innerHTML = `<div>No thumbnail available.</div>`;
+        }
+        // Position the popover
+        const rect = card.getBoundingClientRect();
+        let top = rect.top + window.scrollY;
+        let left = rect.right + 10 + window.scrollX;
+    
+        // Temporarily display popover to get its dimensions
+        popover.style.display = 'block';
+        popover.style.opacity = '0';
+        popover.style.top = `${top}px`;
+        popover.style.left = `${left}px`;
+    
+        // Adjust position after rendering
+        const popoverRect = popover.getBoundingClientRect();
+        if (left + popoverRect.width > window.innerWidth) {
+          left = rect.left - popoverRect.width - 10 + window.scrollX;
+        }
+        if (top + popoverRect.height > window.scrollY + window.innerHeight) {
+          top = window.scrollY + window.innerHeight - popoverRect.height - 10;
+        }
+    
+        popover.style.top = `${top}px`;
+        popover.style.left = `${left}px`;
+        popover.classList.add('show');
+      });
+    
+      card.addEventListener('mouseleave', () => {
+        const popover = document.getElementById('popover');
+        popover.style.display = 'none';
+        popover.style.opacity = '0';
+        popover.classList.remove('show');
+        popover.innerHTML = ''; // Clear content
+      });
+    
+      return card;
+    }
+
+    // Function to get favicon
+    function getFavicon(url) {
+      try {
+        const parsedUrl = new URL(url);
+        return `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=64`;
+      } catch (error) {
+        console.error('Invalid URL:', error);
+        return 'images/placeholder.png'; // Replace with your default image path
+      }
+    }
+    
+
+    async function getThumbnail(url) {
+      let imageUrl = getFavicon(url);
+      if (!imageUrl) {
+        imageUrl = 'images/placeholder.png'; // Replace with your default image path
+      }
+      return imageUrl;
+    }
+    
+    
+
+    
+  
+
+    // Function to render bookmarks
+    function renderBookmarks(bookmarks) {
+      const container = document.getElementById('cards-container');
+      container.innerHTML = ''; // Clear existing content
+      bookmarks.forEach(bookmark => {
+        const card = createCard(bookmark);
+        container.appendChild(card);
+      });
+    }
+
+    // Function to initialize the app
+    function init() {
+        const fileInput = document.getElementById('csv-file-input');
+        const searchInput = document.getElementById('search-input');
+      
+        fileInput.addEventListener('change', function(event) {
+          const file = event.target.files[0];
+          if (file) {
+            Papa.parse(file, {
+              header: true,
+              skipEmptyLines: true,
+              complete: function(results) {
+                let bookmarks = results.data;
+      
+                // Sort bookmarks by time_added descending
+                bookmarks.sort((a, b) => b.time_added - a.time_added);
+      
+                // Initial render
+                renderBookmarks(bookmarks);
+      
+                // Add search functionality
+                searchInput.addEventListener('input', function() {
+                  const query = this.value.toLowerCase();
+                  const filtered = bookmarks.filter(bookmark => {
+                    const titleMatch = bookmark.title.toLowerCase().includes(query);
+                    const tagsMatch = bookmark.tags.toLowerCase().includes(query);
+                    return titleMatch || tagsMatch;
+                  });
+                  renderBookmarks(filtered);
+                });
+              },
+              error: function(error) {
+                console.error('Error parsing CSV:', error);
+              }
+            });
+          }
+        });
+      }
+      
+
+    // Run the init function after the DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+
+</body>
+</html>
